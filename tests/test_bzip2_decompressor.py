@@ -59,7 +59,7 @@ def test_invalid_bzip2_file():
 
 def test_permission_error(tmp_path):
     """Test handling of permission errors."""
-    # Create a temp file with no write permissions
+    # Create a temp file with read+write permissions
     temp_file_path = tmp_path / 'test.bz2'
     
     # Compress some test data with bzip2
@@ -69,12 +69,10 @@ def test_permission_error(tmp_path):
     with open(temp_file_path, 'wb') as f:
         f.write(compressed_data)
     
-    # Remove write permissions
-    os.chmod(temp_file_path, 0o400)
+    # Prepare a read-only output directory
+    output_dir = tmp_path / 'output'
+    output_dir.mkdir(mode=0o555)  # read and execute permissions, but no write
     
-    # Prepare output with no write permissions
-    output_path = tmp_path / 'output'
-    os.chmod(tmp_path, 0o500)  # Remove write permission from directory
-    
+    # Try to write to a read-only directory
     with pytest.raises(PermissionError):
-        decompress_bzip2_file(str(temp_file_path), str(output_path))
+        decompress_bzip2_file(str(temp_file_path), str(output_dir / 'result'))
