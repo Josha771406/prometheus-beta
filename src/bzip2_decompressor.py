@@ -23,10 +23,19 @@ def decompress_bzip2_file(input_path, output_path=None):
     if not os.path.exists(input_path):
         raise FileNotFoundError(f"Input file not found: {input_path}")
 
+    # Check read permissions on input file
+    if not os.access(input_path, os.R_OK):
+        raise PermissionError(f"No read permission for input file: {input_path}")
+
     # Determine output path if not provided
     if output_path is None:
         # Remove .bz2 extension if present
         output_path = input_path.removesuffix('.bz2') if input_path.endswith('.bz2') else input_path + '.decompressed'
+
+    # Check write permissions on output path's directory
+    output_dir = os.path.dirname(output_path) or '.'
+    if not os.access(output_dir, os.W_OK):
+        raise PermissionError(f"No write permission for output directory: {output_dir}")
 
     try:
         # Open input compressed file and output decompressed file
@@ -43,6 +52,8 @@ def decompress_bzip2_file(input_path, output_path=None):
 
     except OSError as e:
         # This will catch various bzip2 specific decompression errors
+        if 'Permission denied' in str(e):
+            raise PermissionError(f"Permission error: {e}")
         raise ValueError(f"Invalid bzip2 compressed file: {e}")
     except Exception as e:
         # Re-raise other unexpected errors
