@@ -2,6 +2,7 @@ import os
 import bz2
 import pytest
 import tempfile
+import mock
 from src.bzip2_decompressor import decompress_bzip2_file
 
 @pytest.fixture
@@ -57,18 +58,24 @@ def test_invalid_bzip2_file():
     # Cleanup
     os.unlink(invalid_file.name)
 
-def test_permission_error(monkeypatch):
+def test_permission_error(tmp_path):
     """Test handling of permission errors."""
-    def mock_open(*args, **kwargs):
-        raise PermissionError("Mocked permission error")
+    # Create a temp file with no write permissions
+    temp_file_path = tmp_path / 'test.bz2'
     
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.bz2') as temp_file:
-        temp_file.close()
-        
-        monkeypatch.setattr('builtins.open', mock_open)
-        
-        with pytest.raises(PermissionError):
-            decompress_bzip2_file(temp_file.name)
+    # Compress some test data with bzip2
+    test_data = b"Test content for bzip2 decompression"
+    compressed_data = bz2.compress(test_data)
     
-    # Cleanup
-    os.unlink(temp_file.name)
+    with open(temp_file_path, 'wb') as f:
+        f.write(compressed_data)
+    
+    # Remove write permissions
+    os.chmod(temp_file_path, 0o400)
+    
+    # Prepare output with no write permissions
+    output_path = tmp_path / 'output'
+    os.chmod(tmp_path, 0o500)  # Remove write permission from directory
+    
+    with pytest.raises(PermissionError):
+        decompress_bzip2_file(str(temp_file_path), str(output_path))
