@@ -2,7 +2,6 @@ import os
 import bz2
 import pytest
 import tempfile
-import mock
 from src.bzip2_decompressor import decompress_bzip2_file
 
 @pytest.fixture
