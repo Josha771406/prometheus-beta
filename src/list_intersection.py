@@ -17,4 +17,11 @@ def find_list_intersection(list1, list2):
         raise TypeError("Both inputs must be lists")
     
     # Use set intersection for efficient unique common elements
-    return sorted(list(set(list1) & set(list2)))
+    # Convert to set first to handle mixed types and ensure efficiency
+    common_elements = set(list1) & set(list2)
+    
+    # Attempt to sort if possible, otherwise return unsorted
+    try:
+        return sorted(common_elements)
+    except TypeError:
+        return list(common_elements)
