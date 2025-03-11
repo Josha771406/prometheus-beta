@@ -1,20 +1,25 @@
 import pytest
 import logging
-from io import StringIO
-import sys
+import io
 
 from src.console_logger import ConsoleLogger, UserPermissionLevel
 
 class TestConsoleLogger:
     def setup_method(self):
-        """Set up a new logger and capture stdout for each test."""
-        # Redirect stdout to capture print output
-        self.captured_output = StringIO()
-        sys.stdout = self.captured_output
+        """Set up a new logger and capture log output for each test."""
+        # Capture log output
+        self.log_capture = io.StringIO()
+        self.log_handler = logging.StreamHandler(self.log_capture)
+        
+        # Create a logger to capture output
+        self.test_logger = logging.getLogger()
+        self.test_logger.setLevel(logging.INFO)
+        self.test_logger.addHandler(self.log_handler)
     
     def teardown_method(self):
-        """Restore stdout after each test."""
-        sys.stdout = sys.__stdout__
+        """Remove the log handler after each test."""
+        self.test_logger.removeHandler(self.log_handler)
+        self.log_capture.close()
     
     def test_log_with_sufficient_permissions(self):
         """Test logging with sufficient permissions."""
@@ -22,7 +27,7 @@ class TestConsoleLogger:
         result = logger.log("Test message", UserPermissionLevel.ADMIN)
         
         assert result is True
-        assert "Test message" in self.captured_output.getvalue()
+        assert "Test message" in self.log_capture.getvalue()
     
     def test_log_with_insufficient_permissions(self):
         """Test logging with insufficient permissions."""
@@ -30,7 +35,7 @@ class TestConsoleLogger:
         result = logger.log("Test message", UserPermissionLevel.USER)
         
         assert result is False
-        assert "Test message" not in self.captured_output.getvalue()
+        assert "Test message" not in self.log_capture.getvalue()
     
     def test_log_at_minimum_permission(self):
         """Test logging at the minimum permission level."""
@@ -38,7 +43,7 @@ class TestConsoleLogger:
         result = logger.log("Test message", UserPermissionLevel.USER)
         
         assert result is True
-        assert "Test message" in self.captured_output.getvalue()
+        assert "Test message" in self.log_capture.getvalue()
     
     def test_log_empty_message_raises_error(self):
         """Test that empty message raises ValueError."""
