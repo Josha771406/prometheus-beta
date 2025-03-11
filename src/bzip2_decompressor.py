@@ -33,11 +33,19 @@ def decompress_bzip2_file(input_path, output_path=None):
         with bz2.open(input_path, 'rb') as compressed_file, \
              open(output_path, 'wb') as decompressed_file:
             # Read and decompress file contents
-            decompressed_file.write(compressed_file.read())
+            decompressed_data = compressed_file.read()
+            
+            # Validate decompressed data exists
+            if not decompressed_data:
+                raise ValueError("Invalid or empty bzip2 compressed file")
+            
+            decompressed_file.write(decompressed_data)
 
-    except bz2.BZip2Error as e:
+    except OSError as e:
+        # This will catch various bzip2 specific decompression errors
         raise ValueError(f"Invalid bzip2 compressed file: {e}")
-    except PermissionError:
-        raise PermissionError(f"Permission denied when accessing files: {input_path} or {output_path}")
+    except Exception as e:
+        # Re-raise other unexpected errors
+        raise
 
     return output_path
