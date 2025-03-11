@@ -13,7 +13,7 @@ def test_negative_integers():
     """Test counting set bits for negative integers."""
     assert count_set_bits(-5) == 2  # Two's complement representation
     assert count_set_bits(-15) == 4 
-    assert count_set_bits(-1) == 64  # All bits set in two's complement
+    assert count_set_bits(-1) == 64  # Python uses arbitrary precision
 
 def test_large_integers():
     """Test counting set bits for large integers."""
