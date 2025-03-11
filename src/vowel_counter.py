@@ -1,3 +1,5 @@
+import unicodedata
+
 def count_vowels_consonants(input_string):
     """
     Count the number of vowels and consonants in a given string.
@@ -15,8 +17,8 @@ def count_vowels_consonants(input_string):
     if not isinstance(input_string, str):
         raise TypeError("Input must be a string")
     
-    # Convert to lowercase for consistent counting
-    input_string = input_string.lower()
+    # Normalize Unicode characters and convert to lowercase
+    normalized_string = unicodedata.normalize('NFKD', input_string).encode('ascii', 'ignore').decode('utf-8').lower()
     
     # Define vowels
     vowels = set('aeiou')
@@ -26,7 +28,7 @@ def count_vowels_consonants(input_string):
     consonant_count = 0
     
     # Count vowels and consonants
-    for char in input_string:
+    for char in normalized_string:
         # Only count alphabetic characters
         if char.isalpha():
             if char in vowels:
