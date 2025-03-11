@@ -21,20 +21,23 @@ def log_execution_time(func: Callable[..., Any]) -> Callable[..., Any]:
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        # Prepare formatted arguments string
+        func_args = [repr(a) for a in args]
+        func_kwargs = [f"{k}={repr(v)}" for k, v in kwargs.items()]
+        func_args_str = ', '.join(func_args + func_kwargs)
+        
         # Log function start with arguments
-        func_args_str = ', '.join([repr(a) for a in args] + 
-                                   [f"{k}={repr(v)}" for k, v in kwargs.items()])
         logger.info(f"Starting execution of {func.__name__}({func_args_str})")
         
         # Record start time
-        start_time = time.time()
+        start_time = time.perf_counter()
         
         try:
             # Execute the function
             result = func(*args, **kwargs)
             
             # Calculate and log execution time
-            end_time = time.time()
+            end_time = time.perf_counter()
             execution_time = end_time - start_time
             logger.info(f"Completed execution of {func.__name__}. "
                         f"Execution time: {execution_time:.4f} seconds")
