@@ -1,6 +1,7 @@
 import requests
 import socket
 import urllib.parse
+import re
 
 def is_website_online(url: str, timeout: float = 5.0) -> bool:
     """
@@ -17,15 +18,23 @@ def is_website_online(url: str, timeout: float = 5.0) -> bool:
         ValueError: If the provided URL is invalid
     """
     # Validate URL
-    try:
-        # If no scheme is present, prepend https://
-        if not url.startswith(('http://', 'https://')):
-            url = f"https://{url}"
-        
-        parsed_url = urllib.parse.urlparse(url)
-        if not parsed_url.scheme or not parsed_url.netloc:
-            raise ValueError("Invalid URL format")
-    except Exception:
+    if not url or not isinstance(url, str):
+        raise ValueError("Invalid URL format")
+    
+    # If no scheme is present, prepend https://
+    if not url.startswith(('http://', 'https://')):
+        url = f"https://{url}"
+    
+    # Additional validation using regex
+    url_regex = re.compile(
+        r'^https?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or IP
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    
+    if not url_regex.match(url):
         raise ValueError("Invalid URL format")
     
     try:
