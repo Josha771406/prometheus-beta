@@ -2,6 +2,7 @@ import os
 import bz2
 import pytest
 import tempfile
+import stat
 from src.bzip2_decompressor import decompress_bzip2_file
 
 @pytest.fixture
@@ -59,7 +60,7 @@ def test_invalid_bzip2_file():
 
 def test_permission_error(tmp_path):
     """Test handling of permission errors."""
-    # Strategy: If can write, try to block writing via read-only
+    # Create a temp file with read+write permissions
     temp_file_path = tmp_path / 'test.bz2'
     
     # Compress some test data with bzip2
@@ -69,20 +70,33 @@ def test_permission_error(tmp_path):
     with open(temp_file_path, 'wb') as f:
         f.write(compressed_data)
     
-    # Try a few strategies to trigger permission error
-    try:
-        # Strategy 1: Read-only output
-        output_file = tmp_path / 'read_only_output'
-        with open(output_file, 'w') as f:
-            f.write('')
-        os.chmod(output_file, 0o400)  # Read-only
+    # Multiple strategies to create permission scenarios
+    scenarios = [
+        # Strategy 1: Output file exists but read-only
+        lambda: (tmp_path / 'read_only_output', 
+                 lambda output_file: os.chmod(output_file, 0o400)),
+        
+        # Strategy 2: Output directory is read-only
+        lambda: (tmp_path / 'output' / 'result', 
+                 lambda output_file: output_file.parent.mkdir(mode=0o555)),
+    ]
 
-        with pytest.raises((PermissionError, OSError)):
+    for output_factory, permission_setter in scenarios:
+        output_file = output_factory()
+        
+        # Reset permissions and ensure directory exists
+        if output_file.parent != tmp_path:
+            output_file.parent.mkdir(exist_ok=True, parents=True)
+        
+        # Optionally create the output file
+        if not output_file.exists():
+            with open(output_file, 'w') as f:
+                f.write('')
+        
+        # Set permissions to make writing impossible
+        permission_setter(output_file)
+        
+        # Attempt to decompress with restricted permissions
+        with pytest.raises((PermissionError, OSError), 
+                           reason=f"Failed scenario: output={output_file}"):
             decompress_bzip2_file(str(temp_file_path), str(output_file))
-    except Exception:
-        # Strategy 2: Read-only output directory
-        output_dir = tmp_path / 'output'
-        output_dir.mkdir(mode=0o555)  # read and execute, no write
-
-        with pytest.raises((PermissionError, OSError)):
-            decompress_bzip2_file(str(temp_file_path), str(output_dir / 'result'))
