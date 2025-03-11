@@ -40,6 +40,5 @@ def test_large_lists():
     """Test intersection with large lists"""
     list1 = list(range(1000)) + [1001]
     list2 = list(range(500, 1500))
-    expected_result = list(range(500, 1000))
     result = find_list_intersection(list1, list2)
-    assert set(result) == set(expected_result)
+    assert set(result) == set(range(500, 1000)) | {1001}
