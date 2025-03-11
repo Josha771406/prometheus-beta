@@ -1,5 +1,6 @@
 import os
 import bz2
+import stat
 
 def decompress_bzip2_file(input_path, output_path=None):
     """
@@ -36,6 +37,15 @@ def decompress_bzip2_file(input_path, output_path=None):
     output_dir = os.path.dirname(output_path) or '.'
     if not os.access(output_dir, os.W_OK):
         raise PermissionError(f"No write permission for output directory: {output_dir}")
+
+    # Check if output file already exists and is writable
+    if os.path.exists(output_path):
+        try:
+            # Check if the file is writable
+            with open(output_path, 'a'):
+                pass
+        except PermissionError:
+            raise PermissionError(f"No write permission for output file: {output_path}")
 
     try:
         # Open input compressed file and output decompressed file
