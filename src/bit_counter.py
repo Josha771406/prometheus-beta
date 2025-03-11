@@ -23,16 +23,11 @@ def count_set_bits(n: int) -> int:
     if not isinstance(n, int):
         raise TypeError("Input must be an integer")
     
-    # Handle negative numbers by converting to unsigned representation
+    # For Python's int type, which has arbitrary precision
+    # Use bit_count() method for more accurate handling of negative numbers
     if n < 0:
-        n = abs(n)
+        # Use bit_count() which works correctly for negative numbers
+        return n.bit_count()
     
     # Count set bits
-    count = 0
-    while n:
-        # Bitwise AND with 1 checks the least significant bit
-        count += n & 1
-        # Right shift to check next bit
-        n >>= 1
-    
-    return count
+    return bin(n).count('1')
