@@ -46,7 +46,7 @@ def test_log_execution_time_with_kwargs():
         # Verify start logging
         start_log = mock_log_info.call_args_list[0][0][0]
         assert "Starting execution of sample_function_kwargs" in start_log
-        assert "x=3, y=5" in start_log
+        assert "(3, y=5)" in start_log
 
 def test_log_execution_time_exception():
     @log_execution_time
