@@ -70,18 +70,35 @@ def test_permission_error(tmp_path):
     with open(temp_file_path, 'wb') as f:
         f.write(compressed_data)
     
-    # Scenario 1: Output file exists but read-only
-    output_file = tmp_path / 'read_only_output'
-    with open(output_file, 'w') as f:
-        f.write('')
-    os.chmod(output_file, 0o400)  # Read-only
-    
-    with pytest.raises((PermissionError, OSError)):
-        decompress_bzip2_file(str(temp_file_path), str(output_file))
+    # Multiple test cases for permission testing
+    permission_test_cases = [
+        # Scenario 1: Try to write to a read-only directory
+        lambda: (
+            str(temp_file_path),
+            str(tmp_path / 'no_write_dir' / 'result.txt'),
+            lambda output_path: os.makedirs(os.path.dirname(output_path), mode=0o555)
+        ),
+        # Scenario 2: Try to write to a read-only file
+        lambda: (
+            str(temp_file_path),
+            str(tmp_path / 'read_only_file'),
+            lambda output_path: (
+                open(output_path, 'w').close(),  # Create file
+                os.chmod(output_path, 0o400)  # Make read-only
+            )
+        )
+    ]
 
-    # Scenario 2: Output directory is read-only
-    output_dir = tmp_path / 'output'
-    output_dir.mkdir(mode=0o555)  # Read and execute, no write
-    
-    with pytest.raises((PermissionError, OSError)):
-        decompress_bzip2_file(str(temp_file_path), str(output_dir / 'result'))
+    # Test each permission scenario
+    for test_case in permission_test_cases:
+        input_path, output_path, permission_setter = test_case()
+        
+        # Set restrictive permissions
+        permission_setter(output_path)
+        
+        # Attempt to decompress and ensure permission error is raised
+        try:
+            decompress_bzip2_file(input_path, output_path)
+            pytest.fail(f"Expected PermissionError for input {input_path}, output {output_path}")
+        except (PermissionError, OSError):
+            pass  # Expected behavior
