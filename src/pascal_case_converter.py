@@ -18,6 +18,8 @@ def convert_to_pascal_case(input_string: str) -> str:
         'HelloWorld'
         >>> convert_to_pascal_case("hello-world")
         'HelloWorld'
+        >>> convert_to_pascal_case("HelloWorld")
+        'HelloWorld'
     """
     # Check if input is a string
     if not isinstance(input_string, str):
@@ -26,6 +28,10 @@ def convert_to_pascal_case(input_string: str) -> str:
     # If input is empty, return empty string
     if not input_string:
         return ""
+    
+    # If the input is already in Pascal case, return it as is
+    if input_string[0].isupper() and all(char.isalnum() for char in input_string):
+        return input_string
     
     # Split the string by non-alphanumeric characters
     words = ''.join(char if char.isalnum() else ' ' for char in input_string).split()
