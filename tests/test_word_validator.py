@@ -64,7 +64,7 @@ def test_word_valid_multiple_rules():
         {'type': 'chars', 'allowed': set('abcdefg')},
         {'type': 'prefix', 'value': 're'}
     ]
-    assert is_word_valid('real', rules) == True
+    assert is_word_valid('read', rules) == True
     assert is_word_valid('reap', rules) == False
     assert is_word_valid('realms', rules) == False
     assert is_word_valid('hello', rules) == False
