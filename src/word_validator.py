@@ -89,12 +89,13 @@ def is_word_valid(word, rules):
             if not all(char in allowed_chars for char in word):
                 return False
         
-        # Prefix/Suffix validation
+        # Prefix validation
         elif rule_type == 'prefix':
             prefix = rule.get('value', '')
             if not word.startswith(prefix):
                 return False
         
+        # Suffix validation
         elif rule_type == 'suffix':
             suffix = rule.get('value', '')
             if not word.endswith(suffix):
