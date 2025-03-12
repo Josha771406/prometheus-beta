@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 def hungarian_algorithm(cost_matrix):
     """
@@ -29,58 +30,13 @@ def hungarian_algorithm(cost_matrix):
     if cost_matrix.ndim != 2 or cost_matrix.shape[0] != cost_matrix.shape[1]:
         raise ValueError("Input must be a square matrix")
     
-    n = cost_matrix.shape[0]
+    # Use scipy's linear_sum_assignment for robust solution
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
     
-    # Step 1: Reduce rows
-    reduced_matrix = cost_matrix.copy()
-    for i in range(n):
-        reduced_matrix[i] -= reduced_matrix[i].min()
-    
-    # Step 2: Reduce columns
-    for j in range(n):
-        reduced_matrix[:, j] -= reduced_matrix[:, j].min()
-    
-    # Step 3: Find optimal assignment using Hungarian matching
-    def kuhn_munkres_matching(matrix):
-        # Adapted from Kuhn-Munkres (Hungarian) algorithm
-        match_x = [-1] * n
-        match_y = [-1] * n
-        used = [False] * n
-        
-        def dfs(v):
-            used[v] = True
-            for u in range(n):
-                if matrix[v][u] == 0 and match_y[u] == -1:
-                    match_x[v] = u
-                    match_y[u] = v
-                    return True
-            
-            for u in range(n):
-                if matrix[v][u] == 0 and not used[match_y[u]]:
-                    if dfs(match_y[u]):
-                        match_x[v] = u
-                        match_y[u] = v
-                        return True
-            
-            return False
-        
-        # Try to match each worker
-        for v in range(n):
-            used = [False] * n
-            dfs(v)
-        
-        return match_x
-    
-    # Find matching
-    assignment_indices = kuhn_munkres_matching(reduced_matrix)
-    
-    # Prepare full assignment list
-    full_assignment = []
-    for worker, job in enumerate(assignment_indices):
-        if job != -1:
-            full_assignment.append((worker, job))
+    # Generate full assignment list
+    assignment = list(zip(row_ind, col_ind))
     
     # Calculate total cost
-    total_cost = sum(cost_matrix[worker, job] for worker, job in full_assignment)
+    total_cost = cost_matrix[row_ind, col_ind].sum()
     
-    return total_cost, full_assignment
+    return total_cost, assignment
