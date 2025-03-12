@@ -57,6 +57,7 @@ def is_word_valid(word, rules):
     Raises:
         ValueError: If rules are improperly formatted.
     """
+    # Explicitly handle None or empty string
     if not word or not isinstance(word, str):
         return False
     
@@ -64,16 +65,13 @@ def is_word_valid(word, rules):
     if not rules:
         return False
     
-    # Pre-process and validate rules
-    try:
-        for rule in rules:
-            if not isinstance(rule, dict):
-                raise ValueError(f"Invalid rule format: {rule}")
-            
-            if 'type' not in rule:
-                raise ValueError(f"Rule missing 'type' key: {rule}")
-    except Exception:
-        return False
+    # Validate rule format
+    for rule in rules:
+        if not isinstance(rule, dict):
+            raise ValueError(f"Invalid rule format: {rule}")
+        
+        if 'type' not in rule:
+            raise ValueError(f"Rule missing 'type' key: {rule}")
     
     # Apply each rule sequentially
     for rule in rules:
@@ -107,6 +105,6 @@ def is_word_valid(word, rules):
         
         # Unsupported rule type
         else:
-            return False
+            raise ValueError(f"Unsupported rule type: {rule_type}")
     
     return True
