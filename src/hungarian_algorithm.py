@@ -31,98 +31,56 @@ def hungarian_algorithm(cost_matrix):
     
     n = cost_matrix.shape[0]
     
-    # Step 1: Subtract row minimums
+    # Step 1: Reduce rows
     reduced_matrix = cost_matrix.copy()
     for i in range(n):
         reduced_matrix[i] -= reduced_matrix[i].min()
     
-    # Step 2: Subtract column minimums
+    # Step 2: Reduce columns
     for j in range(n):
         reduced_matrix[:, j] -= reduced_matrix[:, j].min()
     
-    # Step 3: Cover zeros with minimum number of lines
-    def cover_zeros(matrix):
-        # Create coverage arrays
-        row_covered = np.zeros(n, dtype=bool)
-        col_covered = np.zeros(n, dtype=bool)
+    # Step 3: Find optimal assignment using Hungarian matching
+    def kuhn_munkres_matching(matrix):
+        # Adapted from Kuhn-Munkres (Hungarian) algorithm
+        match_x = [-1] * n
+        match_y = [-1] * n
+        used = [False] * n
         
-        # Count zeros in each row and column
-        zero_rows = [np.sum(row == 0) for row in matrix]
-        zero_cols = [np.sum(matrix[:, col] == 0) for col in range(n)]
-        
-        # Assign lines to cover all zeros
-        lines = 0
-        while lines < n:
-            # Find row or column with most uncovered zeros
-            max_zeros_row = -1
-            max_zeros_col = -1
-            max_zeros = -1
+        def dfs(v):
+            used[v] = True
+            for u in range(n):
+                if matrix[v][u] == 0 and match_y[u] == -1:
+                    match_x[v] = u
+                    match_y[u] = v
+                    return True
             
-            for i in range(n):
-                if not row_covered[i] and zero_rows[i] > max_zeros:
-                    max_zeros = zero_rows[i]
-                    max_zeros_row = i
+            for u in range(n):
+                if matrix[v][u] == 0 and not used[match_y[u]]:
+                    if dfs(match_y[u]):
+                        match_x[v] = u
+                        match_y[u] = v
+                        return True
             
-            for j in range(n):
-                if not col_covered[j] and zero_cols[j] > max_zeros:
-                    max_zeros = zero_cols[j]
-                    max_zeros_col = j
-                    max_zeros_row = -1
-            
-            # Cover the row or column
-            if max_zeros_row != -1:
-                row_covered[max_zeros_row] = True
-                lines += 1
-            elif max_zeros_col != -1:
-                col_covered[max_zeros_col] = True
-                lines += 1
-            else:
-                break
+            return False
         
-        return row_covered, col_covered, lines
+        # Try to match each worker
+        for v in range(n):
+            used = [False] * n
+            dfs(v)
+        
+        return match_x
     
-    # Step 4: Find optimal assignment
-    def find_assignment(matrix):
-        assignment = []
-        used_rows = set()
-        used_cols = set()
-        
-        for i in range(n):
-            for j in range(n):
-                if matrix[i][j] == 0 and i not in used_rows and j not in used_cols:
-                    assignment.append((i, j))
-                    used_rows.add(i)
-                    used_cols.add(j)
-                    break
-        
-        return assignment
+    # Find matching
+    assignment_indices = kuhn_munkres_matching(reduced_matrix)
     
-    # Iterations to find optimal assignment
-    row_covered, col_covered, lines = cover_zeros(reduced_matrix)
-    
-    while lines < n:
-        # Find the smallest uncovered entry
-        min_uncovered = float('inf')
-        for i in range(n):
-            for j in range(n):
-                if not row_covered[i] and not col_covered[j]:
-                    min_uncovered = min(min_uncovered, reduced_matrix[i, j])
-        
-        # Modify matrix
-        for i in range(n):
-            for j in range(n):
-                if row_covered[i]:
-                    reduced_matrix[i, j] += min_uncovered
-                if not col_covered[j]:
-                    reduced_matrix[i, j] -= min_uncovered
-        
-        # Recheck zero coverage
-        row_covered, col_covered, lines = cover_zeros(reduced_matrix)
-    
-    # Find optimal assignment
-    assignment = find_assignment(reduced_matrix)
+    # Prepare full assignment list
+    full_assignment = []
+    for worker, job in enumerate(assignment_indices):
+        if job != -1:
+            full_assignment.append((worker, job))
     
     # Calculate total cost
-    total_cost = sum(cost_matrix[worker, job] for worker, job in assignment)
+    total_cost = sum(cost_matrix[worker, job] for worker, job in full_assignment)
     
-    return total_cost, assignment
+    return total_cost, full_assignment
