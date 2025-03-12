@@ -65,13 +65,10 @@ def is_word_valid(word, rules):
     if not rules:
         return False
     
-    # Cache rule-checking results
-    length_valid = False
-    chars_valid = False
-    prefix_valid = False
-    
-    # Validate rule format and apply rules
+    # Validate each rule and check if the word passes it
+    results = []
     for rule in rules:
+        # Validate rule format
         if not isinstance(rule, dict):
             raise ValueError(f"Invalid rule format: {rule}")
         
@@ -84,31 +81,30 @@ def is_word_valid(word, rules):
         if rule_type == 'length':
             min_length = rule.get('min', 0)
             max_length = rule.get('max', float('inf'))
-            word_length = len(word)
-            length_valid = min_length <= word_length <= max_length
+            result = min_length <= len(word) <= max_length
+            results.append(result)
         
         # Character set validation
         elif rule_type == 'chars':
             allowed_chars = rule.get('allowed', set())
-            chars_valid = set(word).issubset(allowed_chars)
+            result = set(word).issubset(allowed_chars)
+            results.append(result)
         
         # Prefix validation
         elif rule_type == 'prefix':
             prefix = rule.get('value', '')
-            prefix_valid = word.startswith(prefix)
+            result = word.startswith(prefix)
+            results.append(result)
         
         # Suffix validation
         elif rule_type == 'suffix':
             suffix = rule.get('value', '')
-            if not word.endswith(suffix):
-                return False
+            result = word.endswith(suffix)
+            results.append(result)
         
         # Unsupported rule type
         else:
             raise ValueError(f"Unsupported rule type: {rule_type}")
     
-    # Ensure all required rules are met
-    if len(rules) == 3:
-        return length_valid and chars_valid and prefix_valid
-    
-    return all([length_valid, chars_valid, prefix_valid])
+    # Ensure all rules are met
+    return all(results)
