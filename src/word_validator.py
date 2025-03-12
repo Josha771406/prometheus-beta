@@ -60,33 +60,37 @@ def is_word_valid(word, rules):
     if not word or not isinstance(word, str):
         return False
     
+    # Validate rules
+    if not rules:
+        return False
+    
     # Pre-process and validate rules
-    validated_rules = []
-    for rule in rules:
-        if not isinstance(rule, dict):
-            raise ValueError(f"Invalid rule format: {rule}")
-        
-        validated_rules.append(rule)
+    try:
+        for rule in rules:
+            if not isinstance(rule, dict):
+                raise ValueError(f"Invalid rule format: {rule}")
+            
+            if 'type' not in rule:
+                raise ValueError(f"Rule missing 'type' key: {rule}")
+    except Exception:
+        return False
     
     # Apply each rule sequentially
-    for rule in validated_rules:
-        # Check existence of required keys
-        if 'type' not in rule:
-            raise ValueError(f"Rule missing 'type' key: {rule}")
-        
+    for rule in rules:
         rule_type = rule['type']
         
         # Length validation
         if rule_type == 'length':
             min_length = rule.get('min', 0)
             max_length = rule.get('max', float('inf'))
-            if not (min_length <= len(word) <= max_length):
+            word_length = len(word)
+            if not (min_length <= word_length <= max_length):
                 return False
         
         # Character set validation
         elif rule_type == 'chars':
             allowed_chars = rule.get('allowed', set())
-            if not all(char in allowed_chars for char in word):
+            if not set(word).issubset(allowed_chars):
                 return False
         
         # Prefix validation
@@ -103,6 +107,6 @@ def is_word_valid(word, rules):
         
         # Unsupported rule type
         else:
-            raise ValueError(f"Unsupported rule type: {rule_type}")
+            return False
     
     return True
