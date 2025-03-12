@@ -65,12 +65,8 @@ def is_word_valid(word, rules):
     if not rules:
         return False
     
-    # Results tracking
-    length_valid = False
-    chars_valid = False
-    prefix_valid = False
-    
-    # Validate each rule and check if the word passes it
+    # Validate each rule
+    rule_results = []
     for rule in rules:
         # Validate rule format
         if not isinstance(rule, dict):
@@ -80,36 +76,38 @@ def is_word_valid(word, rules):
             raise ValueError(f"Rule missing 'type' key: {rule}")
         
         rule_type = rule['type']
+        result = False
         
         # Length validation
         if rule_type == 'length':
             min_length = rule.get('min', 0)
             max_length = rule.get('max', float('inf'))
-            length_valid = min_length <= len(word) <= max_length
+            result = min_length <= len(word) <= max_length
         
         # Character set validation
         elif rule_type == 'chars':
             allowed_chars = rule.get('allowed', set())
-            chars_valid = set(word).issubset(allowed_chars)
+            result = all(char in allowed_chars for char in word)
         
         # Prefix validation
         elif rule_type == 'prefix':
             prefix = rule.get('value', '')
-            prefix_valid = word.startswith(prefix)
+            result = word.startswith(prefix)
         
         # Suffix validation
         elif rule_type == 'suffix':
             suffix = rule.get('value', '')
-            if not word.endswith(suffix):
-                return False
+            result = word.endswith(suffix)
         
         # Unsupported rule type
         else:
             raise ValueError(f"Unsupported rule type: {rule_type}")
+        
+        rule_results.append(result)
     
-    # For multiple rules, ensure length, chars, and prefix are valid
-    if len(rules) >= 3:
-        return length_valid and chars_valid and prefix_valid
+    # If only one rule, return its result
+    if len(rule_results) == 1:
+        return rule_results[0]
     
-    # For single rule, use all results
-    return all([length_valid, chars_valid, prefix_valid])
+    # For multiple rules, require all to be true
+    return all(rule_results)
