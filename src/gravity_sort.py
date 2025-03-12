@@ -10,7 +10,7 @@ def gravity_sort(arr):
         arr (list): A list of non-negative integers to be sorted.
     
     Returns:
-        list: A sorted list of integers.
+        list: A sorted list of integers in ascending order.
     
     Raises:
         ValueError: If the input contains negative numbers.
@@ -41,7 +41,7 @@ def gravity_sort(arr):
         
         # Adjust rows to reflect gravity
         for row in range(len(beads)):
-            beads[row][col] = 1 if row < col_sum else 0
+            beads[row][col] = 1 if row >= len(beads) - col_sum else 0
     
-    # Convert back to sorted list
-    return [sum(row) for row in beads]
+    # Convert back to sorted list (descending to ascending)
+    return sorted(sum(row) for row in beads)
