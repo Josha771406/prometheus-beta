@@ -6,6 +6,7 @@ def is_valid_ip_address(ip_string: str) -> bool:
     - Consist of 4 octets separated by dots
     - Each octet must be an integer between 0 and 255
     - No leading zeros allowed (except for 0 itself)
+    - No extra whitespace
     
     Args:
         ip_string (str): The string to validate as an IP address
@@ -17,8 +18,13 @@ def is_valid_ip_address(ip_string: str) -> bool:
     if not isinstance(ip_string, str):
         return False
     
+    # Strip whitespace and check for exact match
+    stripped_ip = ip_string.strip()
+    if stripped_ip != ip_string:
+        return False
+    
     # Split the string into octets
-    octets = ip_string.split('.')
+    octets = stripped_ip.split('.')
     
     # Check for exactly 4 octets
     if len(octets) != 4:
