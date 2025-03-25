@@ -25,13 +25,14 @@ def lzw_compress(input_data):
     if not input_data:
         raise ValueError("Input cannot be an empty string")
     
-    # Initialize dictionary with single characters
-    dictionary = {chr(i): i for i in range(256)}
-    next_code = 256
-    result = []
+    # Initialize dictionary with unique characters
+    dictionary = {c: i for i, c in enumerate(set(input_data))}
+    next_code = len(dictionary)
     
     # Compression process
+    result = []
     w = input_data[0]
+    
     for c in input_data[1:]:
         wc = w + c
         if wc in dictionary:
@@ -73,29 +74,35 @@ def lzw_decompress(compressed_data):
     if not all(isinstance(x, int) for x in compressed_data):
         raise TypeError("All elements must be integers")
     
-    # Initialize dictionary with single characters
-    dictionary = {i: chr(i) for i in range(256)}
-    next_code = 256
+    # Reverse mapping to get the dictionary keys
+    reverse_dictionary = {v: k for k, v in lzw_decompress._global_dict.items()}
+    next_code = len(reverse_dictionary)
     
     # Decompression process
     result = []
-    w = chr(compressed_data[0])
-    result.append(w)
+    current = reverse_dictionary[compressed_data[0]]
+    result.append(current)
     
-    for k in compressed_data[1:]:
-        if k in dictionary:
-            entry = dictionary[k]
-        elif k == next_code:
-            entry = w + w[0]
+    for code in compressed_data[1:]:
+        # Determine the entry for this code
+        if code in reverse_dictionary:
+            # Existing code in the dictionary
+            entry = reverse_dictionary[code]
+        elif code == next_code:
+            # Special case: the new sequence is the previous + its first character
+            entry = current + current[0]
         else:
-            raise ValueError(f"Invalid compressed code: {k}")
+            raise ValueError(f"Invalid compressed code: {code}")
         
         result.append(entry)
         
         # Add new sequence to dictionary
-        dictionary[next_code] = w + entry[0]
+        reverse_dictionary[next_code] = current + entry[0]
         next_code += 1
         
-        w = entry
+        current = entry
     
     return ''.join(result)
+
+# Initialize a global dictionary for optimization
+lzw_decompress._global_dict = {c: i for i, c in enumerate(set(chr(x) for x in range(65536)))}
