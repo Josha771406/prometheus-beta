@@ -35,39 +35,6 @@ def find_shortest_path(maze: List[List[int]]) -> Optional[List[Tuple[int, int]]]
     queue = deque([(start, [start])])
     visited = set([start])
     
-    def get_neighbors(cell: Tuple[int, int]) -> List[Tuple[int, int]]:
-        """
-        Get valid neighboring cells that are not walls.
-        
-        Args:
-            cell (Tuple[int, int]): Current cell coordinates
-        
-        Returns:
-            List[Tuple[int, int]]: List of valid neighboring cells
-        """
-        r, c = cell
-        neighbors = [(r+1, c), (r-1, c), (r, c+1), (r, c-1)]
-        return [
-            (nr, nc) for nr, nc in neighbors 
-            if (0 <= nr < len(maze) and 
-                0 <= nc < len(maze[0]) and 
-                (maze[nr][nc] == 0 or maze[nr][nc] == 3))
-    
-    def is_valid(cell: Tuple[int, int]) -> bool:
-        """
-        Check if a cell is a valid, empty cell in the maze.
-        
-        Args:
-            cell (Tuple[int, int]): Cell coordinates to check
-        
-        Returns:
-            bool: True if cell is empty, False otherwise
-        """
-        r, c = cell
-        return (0 <= r < len(maze) and 
-                0 <= c < len(maze[0]) and 
-                maze[r][c] != 1)
-    
     while queue:
         current, path = queue.popleft()
         
@@ -75,11 +42,27 @@ def find_shortest_path(maze: List[List[int]]) -> Optional[List[Tuple[int, int]]]
         if current == end:
             return path
         
-        # Explore neighbors
-        for neighbor in get_neighbors(current):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append((neighbor, path + [neighbor]))
+        # Get possible neighboring cells
+        r, c = current
+        neighbors = [
+            (r+1, c), (r-1, c), 
+            (r, c+1), (r, c-1)
+        ]
+        
+        # Filter valid and unvisited neighbors
+        valid_neighbors = [
+            neighbor for neighbor in neighbors
+            if (0 <= neighbor[0] < len(maze) and 
+                0 <= neighbor[1] < len(maze[0]) and 
+                (maze[neighbor[0]][neighbor[1]] == 0 or 
+                 maze[neighbor[0]][neighbor[1]] == 3) and
+                neighbor not in visited
+        ]
+        
+        # Add valid neighbors to queue
+        for neighbor in valid_neighbors:
+            visited.add(neighbor)
+            queue.append((neighbor, path + [neighbor]))
     
     # No path found
     return None
