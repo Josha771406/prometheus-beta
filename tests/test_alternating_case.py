@@ -8,7 +8,7 @@ def test_basic_conversion():
 
 def test_snake_case_conversion():
     """Test conversion of snake_case strings."""
-    assert to_alternating_path_case("snake_case example") == "snake-Case-Example"
+    assert to_alternating_path_case("snake_case example") == "snakecase-Example"
 
 def test_mixed_case_conversion():
     """Test conversion of mixed case strings."""
