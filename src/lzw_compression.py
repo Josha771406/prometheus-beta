@@ -25,9 +25,10 @@ def lzw_compress(input_data):
     if not input_data:
         raise ValueError("Input cannot be an empty string")
     
-    # Initialize dictionary with single-character strings
-    dictionary = {chr(i): i for i in range(256)}
-    next_code = 256
+    # Initialize dictionary with unique characters from the input
+    unique_chars = list(set(input_data))
+    dictionary = {char: i for i, char in enumerate(unique_chars)}
+    next_code = len(dictionary)
     
     # Compression process
     result = []
@@ -82,9 +83,13 @@ def lzw_decompress(compressed_data):
     if not all(isinstance(x, int) for x in compressed_data):
         raise TypeError("All elements must be integers")
     
-    # Initialize dictionary with single-character strings
-    dictionary = {i: chr(i) for i in range(256)}
-    next_code = 256
+    # Perform reverse mapping
+    initial_codes = set(compressed_data)
+    initial_chars = [chr(code) for code in initial_codes if code < 256]
+    
+    # Initialize dictionary
+    dictionary = {i: char for i, char in enumerate(initial_chars)}
+    next_code = len(dictionary)
     
     # Decompression process
     result = []
