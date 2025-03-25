@@ -41,10 +41,11 @@ def convert_to_path_case(input_string: str) -> str:
     # This regex finds capital letters and adds a hyphen before them, 
     # then converts to lowercase
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', input_string)
-    s2 = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1)
+    s2 = re.sub('([a-z])([0-9])|([0-9])([a-z])', r'\1-\2\3-\4', s1)
+    s3 = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s2)
     
     # Convert to lowercase and replace non-alphanumeric characters with hyphens
-    path_case = re.sub(r'[^a-z0-9]+', '-', s2.lower())
+    path_case = re.sub(r'[^a-z0-9]+', '-', s3.lower())
     
     # Remove leading and trailing hyphens
     path_case = path_case.strip('-')
