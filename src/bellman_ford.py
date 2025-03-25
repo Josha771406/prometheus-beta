@@ -17,11 +17,15 @@ def bellman_ford(graph: List[Tuple[int, int, int]], source: int, num_vertices: i
         ValueError: If source vertex is invalid or graph is improperly formatted
     """
     # Input validation
+    if num_vertices <= 0:
+        raise ValueError("Number of vertices must be positive")
+
     if source < 0 or source >= num_vertices:
         raise ValueError(f"Invalid source vertex. Must be between 0 and {num_vertices - 1}")
     
+    # Special case for single vertex graph (with no edges)
     if not graph:
-        raise ValueError("Graph cannot be empty")
+        return {source: 0} if source == 0 else {}
 
     # Initialize distances
     distances = [float('inf')] * num_vertices
