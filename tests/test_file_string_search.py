@@ -68,16 +68,16 @@ def test_empty_file_path():
     with pytest.raises(ValueError):
         search_string_in_file('', 'test')
 
-def test_case_sensitive_search(cleanup_test_files):
+def test_case_insensitive_search(cleanup_test_files):
     # Create a test file
     create_test_file('test_search.txt', 
         "Hello World\n"
         "hello world\n"
     )
     
-    # Search should be case-sensitive
+    # Search should be case-insensitive
     result = search_string_in_file('test_search.txt', 'Hello')
-    assert result == [1], "Should be case-sensitive"
+    assert result == [1, 2], "Should be case-insensitive"
     
     result = search_string_in_file('test_search.txt', 'hello')
-    assert result == [2], "Should be case-sensitive"
+    assert result == [1, 2], "Should be case-insensitive"
