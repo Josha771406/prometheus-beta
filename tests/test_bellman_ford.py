@@ -69,10 +69,15 @@ def test_invalid_source_vertex():
     with pytest.raises(ValueError, match="Invalid source vertex"):
         bellman_ford(graph, 3, 3)
 
-def test_empty_graph():
-    """Test handling of empty graph"""
-    with pytest.raises(ValueError, match="Graph cannot be empty"):
-        bellman_ford([], 0, 0)
+def test_invalid_number_of_vertices():
+    """Test handling of invalid number of vertices"""
+    graph = [(0, 1, 4), (1, 2, 3)]
+    
+    with pytest.raises(ValueError, match="Number of vertices must be positive"):
+        bellman_ford(graph, 0, 0)
+    
+    with pytest.raises(ValueError, match="Number of vertices must be positive"):
+        bellman_ford(graph, 0, -1)
 
 def test_single_vertex_graph():
     """Test a graph with only one vertex"""
