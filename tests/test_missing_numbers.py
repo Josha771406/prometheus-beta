@@ -31,7 +31,7 @@ def test_non_integer_array_raises_error():
     with pytest.raises(TypeError, match="All elements must be integers"):
         find_missing_numbers([1, 2, '3', 4])
 
-def test_non_sorted_array():
-    """Test a non-sorted array (Note: function assumes sorted input)."""
-    with pytest.raises(TypeError, match="All elements must be integers"):
+def test_non_sorted_array_raises_error():
+    """Test that a non-sorted array raises a ValueError."""
+    with pytest.raises(ValueError, match="Input array must be sorted in ascending order"):
         find_missing_numbers([5, 1, 3, 2, 4])
