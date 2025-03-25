@@ -32,9 +32,14 @@ def to_alternating_path_case(input_string):
     if not input_string:
         return ""
     
-    # Remove special characters and split into words
+    # Replace underscores and remove special characters
     cleaned_string = re.sub(r'[^a-zA-Z0-9\s]', '', input_string)
-    words = cleaned_string.replace('_', ' ').replace('-', ' ').split()
+    
+    # Replace underscores with spaces before splitting
+    cleaned_string = cleaned_string.replace('_', ' ')
+    
+    # Split into words
+    words = cleaned_string.split()
     
     # Convert first word to lowercase, then alternate
     result = [words[0].lower()]
