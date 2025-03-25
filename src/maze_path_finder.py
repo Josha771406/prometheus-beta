@@ -44,20 +44,24 @@ def find_shortest_path(maze: List[List[int]]) -> Optional[List[Tuple[int, int]]]
         
         # Get possible neighboring cells
         r, c = current
-        neighbors = [
-            (r+1, c), (r-1, c), 
-            (r, c+1), (r, c-1)
+        potential_neighbors = [
+            (r+1, c), 
+            (r-1, c), 
+            (r, c+1), 
+            (r, c-1)
         ]
         
         # Filter valid and unvisited neighbors
-        valid_neighbors = [
-            neighbor for neighbor in neighbors
-            if (0 <= neighbor[0] < len(maze) and 
-                0 <= neighbor[1] < len(maze[0]) and 
-                (maze[neighbor[0]][neighbor[1]] == 0 or 
-                 maze[neighbor[0]][neighbor[1]] == 3) and
+        valid_neighbors = []
+        for neighbor in potential_neighbors:
+            nr, nc = neighbor
+            if (
+                0 <= nr < len(maze) and 
+                0 <= nc < len(maze[0]) and 
+                (maze[nr][nc] == 0 or maze[nr][nc] == 3) and
                 neighbor not in visited
-        ]
+            ):
+                valid_neighbors.append(neighbor)
         
         # Add valid neighbors to queue
         for neighbor in valid_neighbors:
