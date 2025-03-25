@@ -19,7 +19,7 @@ def test_repeated_characters():
 
 def test_complex_string():
     """Test a more complex string with various substrings."""
-    assert count_distinct_substrings("abcab") == 13
+    assert count_distinct_substrings("abcab") == 12
 
 def test_none_input():
     """Test that passing None raises a TypeError."""
