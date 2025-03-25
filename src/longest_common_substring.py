@@ -36,7 +36,9 @@ def find_longest_common_substring(str1: str, str2: str) -> str:
     # Fill the dynamic programming table
     for i in range(1, m + 1):
         for j in range(1, n + 1):
+            # Strictly match exact characters (case-sensitive)
             if str1[i-1] == str2[j-1]:
+                # Only continue substring if previous characters matched
                 dp[i][j] = dp[i-1][j-1] + 1
                 
                 # Update max length and ending position
@@ -46,5 +48,6 @@ def find_longest_common_substring(str1: str, str2: str) -> str:
             else:
                 dp[i][j] = 0
 
-    # Return the longest common substring
+    # Return the exact longest common substring
+    # Ensure the substring is a continuous match from the beginning
     return str1[end_index - max_length + 1 : end_index + 1] if max_length > 0 else ""
