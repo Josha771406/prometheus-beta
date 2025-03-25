@@ -25,9 +25,9 @@ def lzw_compress(input_data):
     if not input_data:
         raise ValueError("Input cannot be an empty string")
     
-    # Initialize dictionary with single characters
-    dictionary = {chr(i): i for i in range(256)}
-    next_code = 256
+    # Initialize dictionary with unique characters from input
+    dictionary = {c: i for i, c in enumerate(set(input_data))}
+    next_code = len(dictionary)
     result = []
     
     # Compression process
@@ -52,8 +52,7 @@ def lzw_compress(input_data):
             current_sequence = char
     
     # Output the last sequence
-    if current_sequence:
-        result.append(dictionary[current_sequence])
+    result.append(dictionary[current_sequence])
     
     return result
 
@@ -82,31 +81,30 @@ def lzw_decompress(compressed_data):
     if not all(isinstance(x, int) for x in compressed_data):
         raise TypeError("All elements must be integers")
     
-    # Initialize dictionary with single characters
-    dictionary = {i: chr(i) for i in range(256)}
-    next_code = 256
+    # Reverse mapping
+    reverse_dictionary = {v: k for k, v in enumerate(set(chr(x) for x in compressed_data if x < 65536))}
+    next_code = len(reverse_dictionary)
     result = []
     
     # Decompression process
-    previous_entry = dictionary[compressed_data[0]]
-    result.append(previous_entry)
+    current = reverse_dictionary[compressed_data[0]]
+    result.append(current)
     
     for code in compressed_data[1:]:
         # Determine the current entry
-        if code in dictionary:
-            current_entry = dictionary[code]
+        if code in reverse_dictionary:
+            entry = reverse_dictionary[code]
         elif code == next_code:
-            current_entry = previous_entry + previous_entry[0]
+            entry = current + current[0]
         else:
             raise ValueError(f"Invalid compressed code: {code}")
         
-        result.append(current_entry)
+        result.append(entry)
         
         # Add new sequence to dictionary
-        dictionary[next_code] = previous_entry + current_entry[0]
+        reverse_dictionary[next_code] = current + entry[0]
         next_code += 1
         
-        # Update previous entry
-        previous_entry = current_entry
+        current = entry
     
     return ''.join(result)
