@@ -51,7 +51,7 @@ def find_shortest_path(maze: List[List[int]]) -> Optional[List[Tuple[int, int]]]
             (nr, nc) for nr, nc in neighbors 
             if (0 <= nr < len(maze) and 
                 0 <= nc < len(maze[0]) and 
-                maze[nr][nc] != 1)
+                (maze[nr][nc] == 0 or maze[nr][nc] == 3))
     
     def is_valid(cell: Tuple[int, int]) -> bool:
         """
