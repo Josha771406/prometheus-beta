@@ -25,25 +25,19 @@ def find_longest_common_substring(str1: str, str2: str) -> str:
     if not str1 or not str2:
         return ""
 
-    # Create a matrix to store lengths of common substrings
-    m, n = len(str1), len(str2)
-    
-    # Track the maximum length and substring
-    max_length = 0
-    longest_substring = ""
+    # Find all exact matches with strict constraints
+    def find_strict_match(s1, s2):
+        matches = []
+        for start in range(len(s1)):
+            substring = s1[start:]
+            for end in range(len(substring), 0, -1):
+                candidate = substring[:end]
+                if candidate in s2 and all(c1 == c2 for c1, c2 in zip(candidate, s2[s2.index(candidate):s2.index(candidate)+len(candidate)])):
+                    matches.append(candidate)
+        return matches
 
-    # Iterate through all possible starting positions
-    for i in range(m):
-        for j in range(n):
-            # If characters match, check the continuous substring
-            k = 0
-            while (i + k < m and j + k < n and 
-                   str1[i + k] == str2[j + k]):
-                k += 1
-            
-            # Update longest substring if current is longer
-            if k > max_length:
-                max_length = k
-                longest_substring = str1[i:i+k]
+    # Get all matches
+    matches = find_strict_match(str1, str2)
     
-    return longest_substring
+    # Return the longest match (or empty string if no matches)
+    return max(matches, key=len, default="")
