@@ -25,13 +25,12 @@ def lzw_compress(input_data):
     if not input_data:
         raise ValueError("Input cannot be an empty string")
     
-    # Initialize dictionary with unique characters from the input
-    unique_chars = list(set(input_data))
-    dictionary = {char: i for i, char in enumerate(unique_chars)}
-    next_code = len(dictionary)
+    # Initialize dictionary with single characters
+    dictionary = {input_data[0]: 0}
+    next_code = 1
     
     # Compression process
-    result = []
+    result = [0]  # First character is always 0
     current_sequence = input_data[0]
     
     for char in input_data[1:]:
@@ -83,36 +82,32 @@ def lzw_decompress(compressed_data):
     if not all(isinstance(x, int) for x in compressed_data):
         raise TypeError("All elements must be integers")
     
-    # Perform reverse mapping
-    initial_codes = set(compressed_data)
-    initial_chars = [chr(code) for code in initial_codes if code < 256]
-    
-    # Initialize dictionary
-    dictionary = {i: char for i, char in enumerate(initial_chars)}
-    next_code = len(dictionary)
-    
     # Decompression process
     result = []
-    current_code = compressed_data[0]
-    current_string = dictionary[current_code]
-    result.append(current_string)
+    dictionary = {0: input_data[0] for input_data in enumerate([chr(i) for i in range(256)])}
+    next_code = len(dictionary)
+    
+    current = dictionary[compressed_data[0]]
+    result.append(current)
     
     for code in compressed_data[1:]:
-        # Handle cases where the code might not exist in the dictionary
+        # Determine the entry for this code
         if code in dictionary:
-            new_string = dictionary[code]
+            entry = dictionary[code]
         elif code == next_code:
-            new_string = current_string + current_string[0]
+            entry = current + current[0]
         else:
             raise ValueError(f"Invalid compressed code: {code}")
         
-        result.append(new_string)
+        # Output the entry
+        result.append(entry)
         
         # Add new sequence to dictionary
-        dictionary[next_code] = current_string + new_string[0]
-        next_code += 1
+        if len(current) > 0:
+            dictionary[next_code] = current + entry[0]
+            next_code += 1
         
-        # Update current string
-        current_string = new_string
+        # Update current
+        current = entry
     
     return ''.join(result)
