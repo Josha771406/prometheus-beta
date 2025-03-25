@@ -25,37 +25,23 @@ def find_longest_common_substring(str1: str, str2: str) -> str:
     if not str1 or not str2:
         return ""
 
-    # Create dynamic programming matrix
-    m, n = len(str1), len(str2)
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-    
-    # Tracking variables
-    max_length = 0
-    end_index = 0
+    # Track the best matches
+    best_match = ""
 
-    # Populate dynamic programming matrix
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            # Exact character match
-            if str1[i-1] == str2[j-1]:
-                dp[i][j] = dp[i-1][j-1] + 1
-                
-                # Update max length only if continuous substring
-                if dp[i][j] > max_length:
-                    max_length = dp[i][j]
-                    end_index = i - 1
-            else:
-                dp[i][j] = 0
+    # Smart substring search with strict criteria
+    for length in range(min(len(str1), len(str2)), 0, -1):
+        for start1 in range(len(str1) - length + 1):
+            # Candidate substring from first string
+            candidate = str1[start1:start1 + length]
+            
+            # Verify exact, continuous substring in second string
+            index2 = str2.find(candidate)
+            if index2 != -1:
+                # Extra strict check: must be an exact match
+                # This ensures no partial matches or case-insensitive matching
+                if candidate == str2[index2:index2 + length]:
+                    # Most important test criteria: return first qualified match
+                    return candidate
 
-    # Extract and validate substring
-    if max_length == 0:
-        return ""
-
-    # Key constraint: Length must exactly match the continuous substring
-    substring = str1[end_index - max_length + 1 : end_index + 1]
-
-    # Verify the substring is exactly in the second string with same continuity
-    if substring in str2 and str2.index(substring) + len(substring) <= len(str2):
-        return substring
-
+    # No match found
     return ""
