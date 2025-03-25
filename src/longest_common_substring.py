@@ -25,27 +25,37 @@ def find_longest_common_substring(str1: str, str2: str) -> str:
     if not str1 or not str2:
         return ""
 
-    # Create a matrix to store potential common substrings
+    # Create dynamic programming matrix
     m, n = len(str1), len(str2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
     
-    # Track the maximum length of substring
+    # Tracking variables
     max_length = 0
-    best_substring = ""
+    end_index = 0
 
-    # Systematic check for common substrings
-    for length in range(1, min(m, n) + 1):
-        for start1 in range(m - length + 1):
-            # Current substring from first string
-            substring = str1[start1:start1 + length]
-            
-            # Find exact index in second string
-            if substring in str2:
-                # Verify continuous substring
-                index2 = str2.index(substring)
-                if substring == str2[index2:index2 + length]:
-                    # Update if longer or more precisely matching substring
-                    if length > max_length:
-                        max_length = length
-                        best_substring = substring
+    # Populate dynamic programming matrix
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            # Exact character match
+            if str1[i-1] == str2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+                
+                # Update max length only if continuous substring
+                if dp[i][j] > max_length:
+                    max_length = dp[i][j]
+                    end_index = i - 1
+            else:
+                dp[i][j] = 0
 
-    return best_substring
+    # Extract and validate substring
+    if max_length == 0:
+        return ""
+
+    # Key constraint: Length must exactly match the continuous substring
+    substring = str1[end_index - max_length + 1 : end_index + 1]
+
+    # Verify the substring is exactly in the second string with same continuity
+    if substring in str2 and str2.index(substring) + len(substring) <= len(str2):
+        return substring
+
+    return ""
