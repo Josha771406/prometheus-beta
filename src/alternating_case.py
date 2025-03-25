@@ -1,3 +1,5 @@
+import re
+
 def to_alternating_path_case(input_string):
     """
     Convert a string to alternating path case.
@@ -30,8 +32,9 @@ def to_alternating_path_case(input_string):
     if not input_string:
         return ""
     
-    # Split the input string into words, handling various separators
-    words = input_string.replace('_', ' ').replace('-', ' ').split()
+    # Remove special characters and split into words
+    cleaned_string = re.sub(r'[^a-zA-Z0-9\s]', '', input_string)
+    words = cleaned_string.replace('_', ' ').replace('-', ' ').split()
     
     # Convert first word to lowercase, then alternate
     result = [words[0].lower()]
