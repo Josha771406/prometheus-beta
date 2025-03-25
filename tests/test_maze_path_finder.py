@@ -10,7 +10,7 @@ def test_simple_path():
     ]
     path = find_shortest_path(maze)
     assert path is not None
-    assert len(path) == 2  # Start and end cells
+    assert len(path) == 3  # Start, intermediate, and end cells
     assert path[0] == (1, 0)  # Start cell
     assert path[-1] == (1, 2)  # End cell
 
