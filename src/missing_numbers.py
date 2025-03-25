@@ -11,6 +11,7 @@ def find_missing_numbers(arr):
     Raises:
         ValueError: If the input array is empty.
         TypeError: If the input is not a list or contains non-integer elements.
+        ValueError: If the input array is not sorted.
     """
     # Validate input
     if not arr:
@@ -19,6 +20,10 @@ def find_missing_numbers(arr):
     # Check if all elements are integers
     if not all(isinstance(x, int) for x in arr):
         raise TypeError("All elements must be integers")
+    
+    # Check if array is sorted
+    if arr != sorted(arr):
+        raise ValueError("Input array must be sorted in ascending order")
     
     # If array has only one element, return an empty list
     if len(arr) == 1:
