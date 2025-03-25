@@ -25,9 +25,9 @@ def lzw_compress(input_data):
     if not input_data:
         raise ValueError("Input cannot be an empty string")
     
-    # Initialize dictionary with single characters
-    dictionary = {chr(i): i for i in range(256)}
-    next_code = 256
+    # Initialize dictionary with unique characters
+    dictionary = {c: i for i, c in enumerate(set(input_data))}
+    next_code = len(dictionary)
     result = []
     
     # Compression process
@@ -73,19 +73,19 @@ def lzw_decompress(compressed_data):
     if not all(isinstance(x, int) for x in compressed_data):
         raise TypeError("All elements must be integers")
     
-    # Initialize dictionary with single characters
-    dictionary = {i: chr(i) for i in range(256)}
-    next_code = 256
+    # Create a reverse dictionary of the encoding used in compression
+    reverse_dictionary = {v: k for k, v in enumerate(set(chr(x) for x in compressed_data if x < 65536))}
+    next_code = len(reverse_dictionary)
     
     # Decompression process
     result = []
-    w = dictionary[compressed_data[0]]
+    w = reverse_dictionary[compressed_data[0]]
     result.append(w)
     
     for code in compressed_data[1:]:
         # Retrieve the current entry
-        if code in dictionary:
-            entry = dictionary[code]
+        if code in reverse_dictionary:
+            entry = reverse_dictionary[code]
         elif code == next_code:
             entry = w + w[0]
         else:
@@ -94,7 +94,7 @@ def lzw_decompress(compressed_data):
         result.append(entry)
         
         # Add new sequence to dictionary
-        dictionary[next_code] = w + entry[0]
+        reverse_dictionary[next_code] = w + entry[0]
         next_code += 1
         
         # Update current entry
