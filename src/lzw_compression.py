@@ -26,33 +26,25 @@ def lzw_compress(input_data):
         raise ValueError("Input cannot be an empty string")
     
     # Initialize dictionary with single characters
-    dictionary = {c: i for i, c in enumerate(set(input_data))}
-    next_code = len(dictionary)
+    dictionary = {chr(i): i for i in range(256)}
+    next_code = 256
+    result = []
     
     # Compression process
-    result = []
-    current_sequence = input_data[0]
-    
-    for char in input_data[1:]:
-        # Try to extend the current sequence
-        potential_sequence = current_sequence + char
-        
-        # If the sequence is in the dictionary, extend it
-        if potential_sequence in dictionary:
-            current_sequence = potential_sequence
+    w = input_data[0]
+    for c in input_data[1:]:
+        wc = w + c
+        if wc in dictionary:
+            w = wc
         else:
-            # Output the code for the current sequence
-            result.append(dictionary[current_sequence])
-            
-            # Add the new sequence to the dictionary
-            dictionary[potential_sequence] = next_code
+            result.append(dictionary[w])
+            dictionary[wc] = next_code
             next_code += 1
-            
-            # Reset current sequence to the current character
-            current_sequence = char
+            w = c
     
     # Output the last sequence
-    result.append(dictionary[current_sequence])
+    if w:
+        result.append(dictionary[w])
     
     return result
 
@@ -85,31 +77,25 @@ def lzw_decompress(compressed_data):
     dictionary = {i: chr(i) for i in range(256)}
     next_code = 256
     
-    # Start decompression
+    # Decompression process
     result = []
-    current_code = compressed_data[0]
-    current_sequence = dictionary[current_code]
-    result.append(current_sequence)
+    w = chr(compressed_data[0])
+    result.append(w)
     
-    for code in compressed_data[1:]:
-        # Determine the current entry
-        if code in dictionary:
-            entry = dictionary[code]
-        elif code == next_code:
-            # Special case: new sequence is the previous sequence + its first character
-            entry = current_sequence + current_sequence[0]
+    for k in compressed_data[1:]:
+        if k in dictionary:
+            entry = dictionary[k]
+        elif k == next_code:
+            entry = w + w[0]
         else:
-            raise ValueError(f"Invalid compressed code: {code}")
+            raise ValueError(f"Invalid compressed code: {k}")
         
-        # Add the entry to results
         result.append(entry)
         
         # Add new sequence to dictionary
-        if current_sequence:
-            dictionary[next_code] = current_sequence + entry[0]
-            next_code += 1
+        dictionary[next_code] = w + entry[0]
+        next_code += 1
         
-        # Update current sequence
-        current_sequence = entry
+        w = entry
     
     return ''.join(result)
