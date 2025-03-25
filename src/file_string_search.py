@@ -31,7 +31,7 @@ def search_string_in_file(file_path, search_string):
             matching_lines = [
                 line_num + 1  # 1-indexed line numbers
                 for line_num, line in enumerate(file)
-                if search_string in line
+                if search_string.lower() in line.lower()
             ]
         
         return matching_lines
