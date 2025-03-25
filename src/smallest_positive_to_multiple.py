@@ -25,9 +25,9 @@ def find_smallest_positive_to_multiple(arr):
     current_sum = sum(arr)
     
     # Find the smallest positive integer to make the sum a multiple of 5
-    for i in range(1, 6):  # We only need to check 1-5
-        if (current_sum + i) % 5 == 0:
-            return i
+    remainder = current_sum % 5
     
-    # This should never happen due to modular arithmetic properties
-    return 5
+    if remainder == 0:
+        return 5
+    
+    return 5 - remainder
