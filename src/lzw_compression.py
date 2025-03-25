@@ -25,12 +25,12 @@ def lzw_compress(input_data):
     if not input_data:
         raise ValueError("Input cannot be an empty string")
     
-    # Initialize dictionary with unique characters from input
-    dictionary = {c: i for i, c in enumerate(set(input_data))}
-    next_code = len(dictionary)
+    # Initialize dictionary with single characters
+    dictionary = {chr(i): i for i in range(256)}
+    next_code = 256
+    result = []
     
     # Compression process
-    result = []
     current_sequence = input_data[0]
     
     for char in input_data[1:]:
@@ -82,33 +82,31 @@ def lzw_decompress(compressed_data):
     if not all(isinstance(x, int) for x in compressed_data):
         raise TypeError("All elements must be integers")
     
-    # Initialize dictionary with a sorted list of unique codes
-    unique_codes = sorted(set(compressed_data))
-    dictionary = {code: chr(code) for code in unique_codes}
-    next_code = max(unique_codes) + 1
+    # Initialize dictionary with single characters
+    dictionary = {i: chr(i) for i in range(256)}
+    next_code = 256
+    result = []
     
     # Decompression process
-    result = []
-    current_code = compressed_data[0]
-    current_string = dictionary[current_code]
-    result.append(current_string)
+    previous_entry = dictionary[compressed_data[0]]
+    result.append(previous_entry)
     
     for code in compressed_data[1:]:
         # Determine the current entry
         if code in dictionary:
-            entry = dictionary[code]
+            current_entry = dictionary[code]
         elif code == next_code:
-            entry = current_string + current_string[0]
+            current_entry = previous_entry + previous_entry[0]
         else:
             raise ValueError(f"Invalid compressed code: {code}")
         
-        result.append(entry)
+        result.append(current_entry)
         
         # Add new sequence to dictionary
-        dictionary[next_code] = current_string + entry[0]
+        dictionary[next_code] = previous_entry + current_entry[0]
         next_code += 1
         
-        # Update current string
-        current_string = entry
+        # Update previous entry
+        previous_entry = current_entry
     
     return ''.join(result)
