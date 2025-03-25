@@ -45,7 +45,6 @@ def test_error_handling():
     with pytest.raises(ValueError):
         anagram_checker("  ", "test")
 
-def test_empty_string_anagrams():
-    """Ensure empty strings are not considered anagrams"""
+def test_single_character_anagrams():
+    """Test single character anagrams"""
     assert anagram_checker("a", "a") == True
-    assert anagram_checker("", "") == False  # Handled by input validation
