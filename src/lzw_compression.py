@@ -25,24 +25,9 @@ def lzw_compress(input_data):
     if not input_data:
         raise ValueError("Input cannot be an empty string")
     
-    # Initialize dictionary with mappings
-    compressed_mapping = {}
-    reverse_mapping = {}
-    next_code = 0
-    
-    def get_code(key):
-        """Get or add a code for a sequence."""
-        nonlocal next_code
-        if key not in compressed_mapping:
-            compressed_mapping[key] = next_code
-            reverse_mapping[next_code] = key
-            next_code += 1
-        return compressed_mapping[key]
-    
-    # Initial codes for all characters in the input
-    for char in input_data:
-        if char not in compressed_mapping:
-            get_code(char)
+    # Initialize dictionary with unique characters from input
+    dictionary = {c: i for i, c in enumerate(set(input_data))}
+    next_code = len(dictionary)
     
     # Compression process
     result = []
@@ -52,22 +37,23 @@ def lzw_compress(input_data):
         # Try to extend the current sequence
         potential_sequence = current_sequence + char
         
-        # If the sequence exists, extend it
-        if potential_sequence in compressed_mapping:
+        # If the sequence is in the dictionary, extend it
+        if potential_sequence in dictionary:
             current_sequence = potential_sequence
         else:
             # Output the code for the current sequence
-            result.append(get_code(current_sequence))
+            result.append(dictionary[current_sequence])
             
-            # Add the new sequence 
-            get_code(potential_sequence)
+            # Add the new sequence to the dictionary
+            dictionary[potential_sequence] = next_code
+            next_code += 1
             
             # Reset current sequence to the current character
             current_sequence = char
     
     # Output the last sequence
     if current_sequence:
-        result.append(get_code(current_sequence))
+        result.append(dictionary[current_sequence])
     
     return result
 
@@ -96,29 +82,33 @@ def lzw_decompress(compressed_data):
     if not all(isinstance(x, int) for x in compressed_data):
         raise TypeError("All elements must be integers")
     
-    # Decompression process
-    dictionary = {i: chr(i) for i in range(256)}
-    next_code = 256
+    # Initialize dictionary with a sorted list of unique codes
+    unique_codes = sorted(set(compressed_data))
+    dictionary = {code: chr(code) for code in unique_codes}
+    next_code = max(unique_codes) + 1
     
+    # Decompression process
     result = []
-    previous = chr(compressed_data[0])
-    result.append(previous)
+    current_code = compressed_data[0]
+    current_string = dictionary[current_code]
+    result.append(current_string)
     
     for code in compressed_data[1:]:
         # Determine the current entry
         if code in dictionary:
-            current = dictionary[code]
+            entry = dictionary[code]
         elif code == next_code:
-            current = previous + previous[0]
+            entry = current_string + current_string[0]
         else:
             raise ValueError(f"Invalid compressed code: {code}")
         
-        result.append(current)
+        result.append(entry)
         
         # Add new sequence to dictionary
-        dictionary[next_code] = previous + current[0]
+        dictionary[next_code] = current_string + entry[0]
         next_code += 1
         
-        previous = current
+        # Update current string
+        current_string = entry
     
     return ''.join(result)
