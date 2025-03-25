@@ -32,10 +32,10 @@ def to_alternating_path_case(input_string):
     if not input_string:
         return ""
     
-    # Replace underscores and remove special characters
+    # Remove special characters and replace underscores
     cleaned_string = re.sub(r'[^a-zA-Z0-9\s]', '', input_string)
     
-    # Replace underscores with spaces before splitting
+    # Replace underscores with spaces 
     cleaned_string = cleaned_string.replace('_', ' ')
     
     # Split into words
