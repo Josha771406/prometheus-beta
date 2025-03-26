@@ -16,8 +16,12 @@ def is_anagram(str1: str, str2: str) -> bool:
     Raises:
         ValueError: If either input contains characters other than lowercase letters
     """
+    # Special case for empty strings
+    if str1 == "" and str2 == "":
+        return True
+
     # Validate input contains only lowercase letters
-    if not (str1.islower() and str2.islower()):
+    if not all(c.islower() for c in str1 + str2):
         raise ValueError("Inputs must contain only lowercase letters")
 
     # Quick length check
